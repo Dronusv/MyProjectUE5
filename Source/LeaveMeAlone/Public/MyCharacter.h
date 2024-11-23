@@ -36,6 +36,20 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cursor")
 	FVector CursorSize = FVector(20.0f, 40.0f, 40.0f);
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Zoom")
+	float DefaultArmLength = 1400.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Zoom")
+	float MaxArmLength = 2000.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Zoom")
+	float MinArmLength = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Zoom")
+	float ZoomStep = 10.0f;
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -43,11 +57,17 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 private:
+
+	
+
+
+
+
 	float YRotation = -75.0f;
-	float ArmLength = 1400.0f;
 	float FOV = 55.0f;
 	void MoveForward(float Value);
 	void MoveRight(float Value);
+	void CameraZoom(float Value);
 
 
 };

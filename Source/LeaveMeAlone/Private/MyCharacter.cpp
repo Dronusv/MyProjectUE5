@@ -18,7 +18,7 @@ AMyCharacter::AMyCharacter()
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
 	SpringArmComponent->SetupAttachment(GetRootComponent());
 	SpringArmComponent->SetUsingAbsoluteRotation(true);
-	SpringArmComponent->TargetArmLength = ArmLength;
+	SpringArmComponent->TargetArmLength = DefaultArmLength;
 	SpringArmComponent->SetRelativeRotation(FRotator(YRotation, 0.0f, 0.0f));
 	SpringArmComponent->bDoCollisionTest = false;
 	SpringArmComponent->bEnableCameraLag = true;
@@ -70,6 +70,7 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	PlayerInputComponent->BindAxis("MoveForward", this, &AMyCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AMyCharacter::MoveRight);
+	PlayerInputComponent->BindAxis("MoveCamera", this, &AMyCharacter::CameraZoom);
 }
 void AMyCharacter::MoveForward(float Value)
 {
@@ -78,5 +79,10 @@ void AMyCharacter::MoveForward(float Value)
 void AMyCharacter::MoveRight(float Value)
 {
 	AddMovementInput(GetActorRightVector(), Value);
+}
+void AMyCharacter::CameraZoom(float Value)
+{
+	const float NewTargetArmLength = SpringArmComponent->TargetArmLength + (Value * ZoomStep);	
+	SpringArmComponent->TargetArmLength = FMath::Clamp(NewTargetArmLength, MinArmLength, MaxArmLength);
 }
 

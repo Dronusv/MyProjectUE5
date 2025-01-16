@@ -7,8 +7,12 @@
 #include "Components/DecalComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Components/LMAHealthComponent.h"
+#include "Engine/Engine.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 
+	
 // Sets default values
 AMyCharacter::AMyCharacter()
 {
@@ -21,16 +25,20 @@ AMyCharacter::AMyCharacter()
 	SpringArmComponent->TargetArmLength = DefaultArmLength;
 	SpringArmComponent->SetRelativeRotation(FRotator(YRotation, 0.0f, 0.0f));
 	SpringArmComponent->bDoCollisionTest = false;
-	SpringArmComponent->bEnableCameraLag = true;
+	SpringArmComponent->bEnableCameraLag = true;	
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>("CameraComponent");
 	CameraComponent->SetupAttachment(SpringArmComponent);
 	CameraComponent->SetFieldOfView(FOV);
 	CameraComponent->bUsePawnControlRotation = false;
 
+	HealthComponent = CreateDefaultSubobject<ULMAHealthComponent>("HealthComponent");
+
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
+
+		
 
 }
 
@@ -43,12 +51,75 @@ void AMyCharacter::BeginPlay()
 		CurrentCursor = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), CursorMaterial, CursorSize,
 			FVector(0));
 	}
+	OnHealthChanged(HealthComponent->GetHealth());
+	HealthComponent->OnHealthChanged.AddUObject(this, &AMyCharacter::OnHealthChanged);
+	HealthComponent->OnDeath.AddUObject(this, &AMyCharacter::OnDeath);
+	
 }
 
 // Called every frame
 void AMyCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	if (!(HealthComponent->IsDead()))
+	{
+		RotationPlayerOnCursor();
+	}
+	
+	if (bIsSprint == true && Stamina !=0.f) {
+		DecreaseStamina();
+	}
+	else {
+		if (bIsSprint == false && Stamina != 100.f) {
+			IncreaseStamina();
+		}
+	}
+	
+	if (FMath::IsNearlyZero(Stamina)) {
+		StopSprint();
+	}
+}
+
+// Called to bind functionality to input
+void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{	
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	PlayerInputComponent->BindAxis("MoveForward", this, &AMyCharacter::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &AMyCharacter::MoveRight);
+	PlayerInputComponent->BindAxis("MoveCamera", this, &AMyCharacter::CameraZoom);
+
+
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AMyCharacter::StartSprint);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AMyCharacter::StopSprint);
+
+}
+void AMyCharacter::MoveForward(float Value)
+{
+	AddMovementInput(GetActorForwardVector(), Value);
+}
+void AMyCharacter::MoveRight(float Value)
+{
+	AddMovementInput(GetActorRightVector(), Value);
+}
+void AMyCharacter::CameraZoom(float Value)
+{
+	const float NewTargetArmLength = SpringArmComponent->TargetArmLength + (Value * ZoomStep);	
+	SpringArmComponent->TargetArmLength = FMath::Clamp(NewTargetArmLength, MinArmLength, MaxArmLength);
+}
+
+void AMyCharacter::OnDeath()
+{
+	CurrentCursor->DestroyRenderState_Concurrent();
+	PlayAnimMontage(DeathMontage);
+	GetCharacterMovement()->DisableMovement();
+	SetLifeSpan(5.0f);
+	if (Controller)
+	{
+		Controller->ChangeState(NAME_Spectating);
+	}
+}
+void AMyCharacter::RotationPlayerOnCursor()
+{
 	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (PC)
 	{
@@ -64,25 +135,38 @@ void AMyCharacter::Tick(float DeltaTime)
 	}
 }
 
-// Called to bind functionality to input
-void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+//sprint 
+void AMyCharacter::StartSprint()
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	PlayerInputComponent->BindAxis("MoveForward", this, &AMyCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &AMyCharacter::MoveRight);
-	PlayerInputComponent->BindAxis("MoveCamera", this, &AMyCharacter::CameraZoom);
+	bIsSprint = true;
+	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+	DecreaseStamina();
 }
-void AMyCharacter::MoveForward(float Value)
+void AMyCharacter::StopSprint()
 {
-	AddMovementInput(GetActorForwardVector(), Value);
+	bIsSprint = false;
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	IncreaseStamina();
 }
-void AMyCharacter::MoveRight(float Value)
+void AMyCharacter::DecreaseStamina()
 {
-	AddMovementInput(GetActorRightVector(), Value);
+	CurrentStamina = Stamina - MinusStamina;
+	Stamina = CurrentStamina;
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, FString::Printf(TEXT("Stamina Decreased = %f"),Stamina));
 }
-void AMyCharacter::CameraZoom(float Value)
+void AMyCharacter::IncreaseStamina()
 {
-	const float NewTargetArmLength = SpringArmComponent->TargetArmLength + (Value * ZoomStep);	
-	SpringArmComponent->TargetArmLength = FMath::Clamp(NewTargetArmLength, MinArmLength, MaxArmLength);
+	if (bIsSprint == false) {
+		CurrentStamina = Stamina + PlusStamina;
+		Stamina = CurrentStamina;
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, FString::Printf(TEXT("Stamina Increased = %f"), Stamina));
+	}
+
+}
+void AMyCharacter::OnHealthChanged(float NewHealth)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Health = %f"),
+		NewHealth));
 }
 

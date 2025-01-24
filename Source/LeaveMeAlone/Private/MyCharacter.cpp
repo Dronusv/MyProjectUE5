@@ -10,7 +10,7 @@
 #include "Components/LMAHealthComponent.h"
 #include "Engine/Engine.h"
 #include "GameFramework/CharacterMovementComponent.h"
-
+#include "Components/LMAWeaponComponent.h"
 
 	
 // Sets default values
@@ -38,6 +38,7 @@ AMyCharacter::AMyCharacter()
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
+	WeaponComponent = CreateDefaultSubobject<ULMAWeaponComponent>("Weapon");
 		
 
 }
@@ -91,6 +92,12 @@ void AMyCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AMyCharacter::StartSprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AMyCharacter::StopSprint);
+
+	PlayerInputComponent->BindAction("Fire", IE_Pressed,WeaponComponent, &ULMAWeaponComponent::Fire);
+	PlayerInputComponent->BindAction("Fire", IE_Released, WeaponComponent, &ULMAWeaponComponent::StopFire);
+
+
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, WeaponComponent, &ULMAWeaponComponent::ReloadPress);
 
 }
 void AMyCharacter::MoveForward(float Value)

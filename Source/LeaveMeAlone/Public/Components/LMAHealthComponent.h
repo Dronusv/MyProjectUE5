@@ -33,7 +33,7 @@ protected:
 
 	virtual void BeginPlay() override;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	float MaxHealth = 100.0f;
+	float MaxHealth = 100.0f;	
 
 	
 private: 

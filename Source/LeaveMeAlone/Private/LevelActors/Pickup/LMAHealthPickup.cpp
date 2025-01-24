@@ -4,7 +4,7 @@
 #include "LevelActors/Pickup/LMAHealthPickup.h"
 #include "Components/LMAHealthComponent.h"
 #include "Components/SphereComponent.h"
-#include "C:\Users\PC\Documents\Unreal Projects\LeaveMeAlone\Source\LeaveMeAlone\Public\MyCharacter.h"
+#include "MyCharacter.h"
 
 // Sets default values
 ALMAHealthPickup::ALMAHealthPickup()

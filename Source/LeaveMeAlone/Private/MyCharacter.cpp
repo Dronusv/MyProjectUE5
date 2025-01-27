@@ -7,7 +7,7 @@
 #include "Components/DecalComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "Components/LMAHealthComponent.h"
+#include "Components/LMAHealthComponent.h"	
 #include "Engine/Engine.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/LMAWeaponComponent.h"
@@ -160,14 +160,14 @@ void AMyCharacter::DecreaseStamina()
 	CurrentStamina = Stamina - MinusStamina;
 	Stamina = CurrentStamina;
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, FString::Printf(TEXT("Stamina Decreased = %f"),Stamina));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, FString::Printf(TEXT("Stamina Decreased = %f"),Stamina));
 }
 void AMyCharacter::IncreaseStamina()
 {
 	if (bIsSprint == false) {
 		CurrentStamina = Stamina + PlusStamina;
 		Stamina = CurrentStamina;
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, FString::Printf(TEXT("Stamina Increased = %f"), Stamina));
+	//	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, FString::Printf(TEXT("Stamina Increased = %f"), Stamina));
 	}
 
 }

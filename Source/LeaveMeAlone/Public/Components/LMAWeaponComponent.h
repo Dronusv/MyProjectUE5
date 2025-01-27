@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Weapon/LMABaseWeapon.h"
 #include "LMAWeaponComponent.generated.h"
 
 
@@ -26,6 +27,9 @@ public:
 	void Reload();
 	void ReloadEmpty();
 	void ReloadPress();
+
+	UFUNCTION(BlueprintCallable)
+	bool GetCurrentWeaponAmmo(FAmmoWeapon& AmmoWeapon) const;
 
 protected:
 	// Called when the game starts

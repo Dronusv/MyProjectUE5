@@ -4,7 +4,7 @@
 #include "Components/LMAWeaponComponent.h"
 #include "GameFramework/Character.h"
 #include "LMAReloadFinishedAnimNotify.h"
-#include "Weapon/LMABaseWeapon.h"
+
 
 // Sets default values for this component's properties
 ULMAWeaponComponent::ULMAWeaponComponent()
@@ -111,6 +111,17 @@ void ULMAWeaponComponent::OnNotifyReloadFinished(USkeletalMeshComponent* Skeleta
 bool ULMAWeaponComponent::CanReload() const
 {
 	return !AnimReloading && !Weapon->ClipIsFull();
+}
+
+bool ULMAWeaponComponent::GetCurrentWeaponAmmo(FAmmoWeapon& AmmoWeapon)
+const
+{
+	if (Weapon)
+	{
+		AmmoWeapon = Weapon->GetCurrentAmmoWeapon();
+		return true;
+	}
+	return false;
 }
 
 

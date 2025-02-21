@@ -39,7 +39,8 @@ AMyCharacter::AMyCharacter()
 	bUseControllerRotationRoll = false;
 
 	WeaponComponent = CreateDefaultSubobject<ULMAWeaponComponent>("Weapon");
-		
+	
+	bool ImHateThisShit = true;
 
 }
 
